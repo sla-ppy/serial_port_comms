@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 int paramCheck(int argc, char** argv, char** request) {
     // basic usage checks
@@ -68,13 +69,31 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    printf("Request after ParamCheck: %s\n", request);
-    free(request);
+    // check if parameter is valid command
+    char* command_list[3] = { "ASKI", "ASKA", "SETG" };
+    char* request_cmd = malloc((sizeof(char) * 4) + 1);
+    for (int i = 1; i < 5; i++) {
+        request_cmd[i - 1] = request[i];
+    }
+    int command_list_size = sizeof(command_list) / sizeof(*command_list);
+    for (int i = 0; i < command_list_size; i++) {
+        rc = strcmp(request_cmd, command_list[i]);
+        if (rc == 0) {
+            break;
+        }
+
+        if (i == command_list_size - 1) {
+            printf("[ERRR] Invalid command. Command List: [ASKI, ASKA, SETG]\n");
+            return 1;
+        }
+    }
 
     // check for hex value = >isxdigit();
 
     // process request
 
     // send response
+    free(request);
+    free(request_cmd);
     return 0;
 }
