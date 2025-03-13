@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,7 +7,7 @@
 
 // returns the correct, length-guaranteed errr message
 const char* getErrrMsg(const int errr_code) {
-    const char* errr_list[10] = {
+    const char* errr_list[11] = {
         "[ERRR] Errr list contains string literal where length is incorrect!\n",
         "[ERRR] Usage: ./main <message>\n",
         "[ERRR] Message too long. Maximum size allowed: 255\n",
@@ -16,7 +17,8 @@ const char* getErrrMsg(const int errr_code) {
         "[ERRR] The last two characters have to be '#'. Format: [*CCCC:param##]\n",
         "[ERRR] Invalid command. Command List: [ASKI | ASKA | SETG]\n",
         "[ERRR] ASKI must have an empty param list! Format: [*ASKI:##]\n",
-        "[ERRR] ASKA must have an empty param list! Format: [*ASKA:##]\n"
+        "[ERRR] ASKA must have an empty param list! Format: [*ASKA:##]\n",
+        "[ERRR] SETG must contain gain value in HEX format! Format: [*SETG:07##]\n"
     };
 
     // loop through error messages, guarantee all are below the max length of 127
@@ -102,7 +104,7 @@ int main(int argc, char** argv) {
 
     // check if parameter is valid command
     const char* command_list[3] = { "ASKI", "ASKA", "SETG" };
-    char* message_cmd = malloc((sizeof(char) * 4) + 1);
+    char* message_cmd = (char*)malloc((sizeof(char) * 4) + 1);
     for (int i = 1; i < 5; i++) {
         message_cmd[i - 1] = message[i];
     }
@@ -127,10 +129,10 @@ int main(int argc, char** argv) {
             printf("%s", getErrrMsg(8));
             return 1;
         } else {
-            char* device_type = "BRTK12";
-            char* serial_number = "34";
-            char* manufacturing_date = "2022-11-23";
-            char* firmware_version = "v2.4";
+            const char* device_type = "BRTK12";
+            const char* serial_number = "34";
+            const char* manufacturing_date = "2022-11-23";
+            const char* firmware_version = "v2.4";
 
             printf("!ASKI:%s,%s,%s,%s##\n", device_type, serial_number, manufacturing_date, firmware_version);
         }
@@ -146,29 +148,67 @@ int main(int argc, char** argv) {
             printf("%s", getErrrMsg(9));
             return 1;
         } else {
-            float temperature = 32.4; // float
-            float supply_voltage = 11.7; // float
-            unsigned int alarms = 23; // HEX value
-            unsigned int gain = 5; // HEX value
+            const float temperature = 32.4; // float
+            const float supply_voltage = 11.7; // float
+            const unsigned int alarms = 0x23; // HEX value
+            const unsigned int gain = 0x5; // HEX value
 
             printf("!ASKA:%.1f,%.1f,%.2X,%.2X##\n", temperature, supply_voltage, alarms, gain);
         }
 
     } else if (strcmp(message_cmd, "SETG") == 0) {
+        char* hex_input = (char*)malloc((sizeof(char) * 2) + 1);
+        hex_input[0] = message[6];
+        hex_input[1] = message[7];
+        hex_input[strlen(hex_input)] = '\0';
 
-        printf("!SETG:par,par,par##\n");
+        if (message[6] == '#') {
+            printf("%s", getErrrMsg(10));
+            return 1;
+        }
+
+        const char* resp_beg = "!SETG:";
+        const char* resp_end = "##\n";
+        char* full_resp = (char*)malloc(strlen(resp_beg) + (sizeof(char) * 2) + strlen(resp_end) + 1);
+        strcpy(full_resp, resp_beg);
+
+        const char* two_chars_list[5] = { "10", "11", "12", "13", "14" };
+        const int two_chars_list_size = sizeof(two_chars_list) / sizeof(*two_chars_list);
+        for (int i = 0; i < two_chars_list_size; i++) {
+            if (strcmp(hex_input, two_chars_list[i]) == 0) {
+                full_resp[6] = message[6];
+                full_resp[7] = message[7];
+            }
+        }
+
+        // TODO: guarantee correct input range
+        char* allowed_list[16] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F" };
+        for (int i = 0; i < 2; i++) {
+            for (int y = 0; y < 15; y++) {
+                if (hex_input[i] != (*allowed_list)[y]) {
+                    continue;
+                } else {
+                    printf("Matching char found: %c\n", (*allowed_list)[y]);
+                    break;
+                }
+            }
+        }
+        strcat(full_resp, resp_end);
+        full_resp[strlen(full_resp)] = '\0';
+
+        printf("%s", full_resp);
+        free(full_resp);
+
+        free(hex_input);
     }
 
     // todo: guarantee an empty list on ASKI and ASKA
-    // todo: guarantee that gains are needed for SETG
 
     // TODO: how to guarantee that we only use ASCII inside our program?
     // not sure how to implement it
     // gave it thought, and the suggestion was that if i was working with files,
     // i could look at the file header and make sure its ASCII encoded, but thats not an option here
     // LC_ALL if on POSIX is a thing
-
-    // TODO: check for hex value = >isxdigit();
 
     free(message);
     free(message_cmd);
