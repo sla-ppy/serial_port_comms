@@ -5,26 +5,31 @@
 #include <sys/types.h>
 
 // returns the correct, length-guaranteed errr message
-char* getErrrMsg(int errr_code) {
-    char* errr_list[8] = {
-        "[ERRR] Errr list contains string literal, where length is incorrect!\n",
+const char* getErrrMsg(const int errr_code) {
+    const char* errr_list[10] = {
+        "[ERRR] Errr list contains string literal where length is incorrect!\n",
         "[ERRR] Usage: ./main <message>\n",
         "[ERRR] Message too long. Maximum size allowed: 255\n",
-        "[ERRR] Message must start with character '*'. Format: [*CCCC:par,par##]\n",
-        "[ERRR] Command code may only contain 4 uppercase letters. Format: [*CCCC:par,par##]\n",
-        "[ERRR] The 5th character has to be ':'. Format: [*CCCC:par,par##]\n",
-        "[ERRR] The last two characters have to be '#'. Format: [*CCCC:par,par##]\n",
-        "[ERRR] Invalid command. Command List: [ASKI, ASKA, SETG]\n"
+        "[ERRR] Message must start with character '*'. Format: [*CCCC:param##]\n",
+        "[ERRR] Command code may only contain 4 uppercase letters. Format: [*CCCC:param##]\n",
+        "[ERRR] The 5th character has to be ':'. Format: [*CCCC:param##]\n",
+        "[ERRR] The last two characters have to be '#'. Format: [*CCCC:param##]\n",
+        "[ERRR] Invalid command. Command List: [ASKI | ASKA | SETG]\n",
+        "[ERRR] ASKI must have an empty param list! Format: [*ASKI:##]\n",
+        "[ERRR] ASKA must have an empty param list! Format: [*ASKA:##]\n"
     };
 
     // loop through error messages, guarantee all are below the max length of 127
-    int errr_list_size = sizeof(errr_list) / sizeof(*errr_list);
+    const int errr_list_size = sizeof(errr_list) / sizeof(*errr_list);
     for (int i = 0; i < errr_list_size; i++) {
         if (strlen(errr_list[i]) > 126) { // 126, +1 for null terminator
             printf("%s", errr_list[0]);
             exit(1);
         }
     }
+
+    // TODO: implement "Error description cannot contain the ',' (comma) separator character"
+    //  "[ERRR] Errr list contains string with a comma character!\n",
 
     return errr_list[errr_code];
 }
@@ -88,7 +93,7 @@ int paramCheck(int argc, char** argv, char** message) {
 
 int main(int argc, char** argv) {
 
-    // format check message
+    // check formatting for message
     char* message = NULL;
     int rc = paramCheck(argc, argv, &message);
     if (rc == 1) {
@@ -96,12 +101,12 @@ int main(int argc, char** argv) {
     }
 
     // check if parameter is valid command
-    char* command_list[3] = { "ASKI", "ASKA", "SETG" };
+    const char* command_list[3] = { "ASKI", "ASKA", "SETG" };
     char* message_cmd = malloc((sizeof(char) * 4) + 1);
     for (int i = 1; i < 5; i++) {
         message_cmd[i - 1] = message[i];
     }
-    int command_list_size = sizeof(command_list) / sizeof(*command_list);
+    const int command_list_size = sizeof(command_list) / sizeof(*command_list);
     for (int i = 0; i < command_list_size; i++) {
         rc = strcmp(message_cmd, command_list[i]);
         if (rc == 0) {
@@ -114,11 +119,57 @@ int main(int argc, char** argv) {
         }
     }
 
-    // check for hex value = >isxdigit();
-
-    // process message
+    // process response
 
     // send response
+    if (strcmp(message_cmd, "ASKI") == 0) {
+        if (message[6] != '#') {
+            printf("%s", getErrrMsg(8));
+            return 1;
+        } else {
+            char* device_type = "BRTK12";
+            char* serial_number = "34";
+            char* manufacturing_date = "2022-11-23";
+            char* firmware_version = "v2.4";
+
+            printf("!ASKI:%s,%s,%s,%s##\n", device_type, serial_number, manufacturing_date, firmware_version);
+        }
+
+    } else if (strcmp(message_cmd, "ASKA") == 0) {
+        // may have entirely missed the point on encoding specs?
+        // but why would i need to encode anything if ASKA doesn't take anything as input?
+        // i got really confused here, went with my gut
+        // i believe the real answer is that i have to take store ASCII strings then convert them by the encoding
+        // and then return the results?
+
+        if (message[6] != '#') {
+            printf("%s", getErrrMsg(9));
+            return 1;
+        } else {
+            float temperature = 32.4; // float
+            float supply_voltage = 11.7; // float
+            unsigned int alarms = 23; // HEX value
+            unsigned int gain = 5; // HEX value
+
+            printf("!ASKA:%.1f,%.1f,%.2X,%.2X##\n", temperature, supply_voltage, alarms, gain);
+        }
+
+    } else if (strcmp(message_cmd, "SETG") == 0) {
+
+        printf("!SETG:par,par,par##\n");
+    }
+
+    // todo: guarantee an empty list on ASKI and ASKA
+    // todo: guarantee that gains are needed for SETG
+
+    // TODO: how to guarantee that we only use ASCII inside our program?
+    // not sure how to implement it
+    // gave it thought, and the suggestion was that if i was working with files,
+    // i could look at the file header and make sure its ASCII encoded, but thats not an option here
+    // LC_ALL if on POSIX is a thing
+
+    // TODO: check for hex value = >isxdigit();
+
     free(message);
     free(message_cmd);
     return 0;
