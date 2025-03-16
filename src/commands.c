@@ -48,7 +48,11 @@ int executeCodeSetg(char** message) {
         printf("%s", getErrrMsg(11));
         return 1;
     } else {
-        char* hex_input = (char*)malloc((sizeof(char) * 2) + 1);
+        char* hex_input = (char*)malloc(3);
+        if (hex_input == NULL) {
+            free(hex_input);
+            return 1;
+        }
         hex_input[0] = (*message)[6];
         hex_input[1] = (*message)[7];
         hex_input[strlen(hex_input)] = '\0';
@@ -56,6 +60,12 @@ int executeCodeSetg(char** message) {
         const char* resp_beg = "!SETG:";
         const char* resp_end = "##\n";
         char* full_resp = (char*)malloc(strlen(resp_beg) + (sizeof(char) * 2) + strlen(resp_end) + 1);
+        if (full_resp == NULL) {
+            free(hex_input);
+            free(full_resp);
+            return 1;
+        }
+
         strcpy(full_resp, resp_beg);
 
         bool valid_input = false;
