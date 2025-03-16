@@ -6,7 +6,7 @@
 #include "errors.h"
 
 // guarantee messages are properly received from the user
-int isInputCorrect(int argc, char** argv, char** message) {
+int isValidCommand(int argc, char** argv, char** message, char** message_cmd) {
     // basic usage checks
     if (argc < 2) {
         printf("%s", getErrrMsg(2));
@@ -56,11 +56,7 @@ int isInputCorrect(int argc, char** argv, char** message) {
     // set last char to null terminator
     (*message)[strlen(*message)] = '\0';
 
-    return 0;
-}
-
-int isValidCommand(char** message, char** message_cmd) {
-    // ensure input is valid message
+    // guarantee that the message is a valid command from our list
     const char* command_list[3] = { "ASKI", "ASKA", "SETG" };
     *message_cmd = (char*)malloc((sizeof(char) * 4) + 1);
     for (int i = 1; i < 5; i++) {

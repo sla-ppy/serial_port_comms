@@ -8,13 +8,8 @@
 int main(int argc, char** argv) {
     // check formatting for message
     char* message = NULL;
-    int rc = isInputCorrect(argc, argv, &message);
-    if (rc == 1) {
-        return 1;
-    }
-
     char* message_cmd = NULL;
-    rc = isValidCommand(&message, &message_cmd);
+    int rc = isValidCommand(argc, argv, &message, &message_cmd);
     if (rc == 1) {
         return 1;
     }

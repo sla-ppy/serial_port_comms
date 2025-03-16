@@ -5,6 +5,7 @@
 #include "commands.h"
 #include "errors.h"
 
+// returns ASKI response
 int executeCodeAski(char** message) {
     if ((*message)[6] != '#') {
         printf("%s", getErrrMsg(9));
@@ -21,13 +22,8 @@ int executeCodeAski(char** message) {
     return 0;
 }
 
+// returns ASKA response
 int executeCodeAska(char** message) {
-    // may have entirely missed the point on encoding specs?
-    // but why would i need to encode anything if ASKA doesn't take anything as input?
-    // i got really confused here, went with my gut
-    // i believe the real answer is that i have to take store ASCII strings then convert them by the encoding
-    // and then return the results?
-
     if ((*message)[6] != '#') {
         printf("%s", getErrrMsg(10));
         return 1;
@@ -46,6 +42,7 @@ int executeCodeAska(char** message) {
 typedef enum { true,
     false } bool;
 
+// returns SETG response
 int executeCodeSetg(char** message) {
     char* hex_input = (char*)malloc((sizeof(char) * 2) + 1);
     hex_input[0] = (*message)[6];
