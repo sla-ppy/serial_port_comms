@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,43 +8,47 @@
 
 int main(int argc, char** argv) {
     // check formatting for message
-    char* message = NULL;
-    char* message_cmd = NULL;
+    char msg_cmd[5];
+    const size_t msg_cmd_size = sizeof(msg_cmd);
 
-    char* command_list[3] = { "ASKI", "ASKA", "SETG" };
+    char* cmd_list[3] = { "ASKI", "ASKA", "SETG" };
+    const size_t cmd_list_size = sizeof(cmd_list) / sizeof(*cmd_list);
 
-    int rc = isValidInput(argc, argv, &message, &message_cmd, command_list);
+    // while (1) {
+    //  getc(stdin);
+
+    /*
+    while(!eof) {
+    FILE *file;
+    file = fopen("input.txt", "r");
+
+    }
+
+
+    */
+
+    int rc = isValidInput(argc, argv, msg_cmd, msg_cmd_size, cmd_list, cmd_list_size);
     if (rc == 1) {
-        free(message);
-        free(message_cmd);
         return 1;
     }
 
     // process and send response
-    if (strcmp(message_cmd, command_list[0]) == 0) {
-        rc = executeCodeAski(&message);
+    if (strcmp(msg_cmd, cmd_list[0]) == 0) {
+        rc = executeCodeAski(argv);
         if (rc == 1) {
-            free(message);
-            free(message_cmd);
             return 1;
         }
-    } else if (strcmp(message_cmd, command_list[1]) == 0) {
-        rc = executeCodeAska(&message);
+    } else if (strcmp(msg_cmd, cmd_list[1]) == 0) {
+        rc = executeCodeAska(argv);
         if (rc == 1) {
-            free(message);
-            free(message_cmd);
             return 1;
         }
-    } else if (strcmp(message_cmd, command_list[2]) == 0) {
-        rc = executeCodeSetg(&message);
+    } else if (strcmp(msg_cmd, cmd_list[2]) == 0) {
+        rc = executeCodeSetg(argv);
         if (rc == 1) {
-            free(message);
-            free(message_cmd);
             return 1;
         }
     }
 
-    free(message);
-    free(message_cmd);
     return 0;
 }

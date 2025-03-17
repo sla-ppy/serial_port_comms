@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,8 +7,9 @@
 #include "errors.h"
 
 // returns ASKI response
-int executeCodeAski(char** message) {
-    if ((*message)[6] != '#') {
+int executeCodeAski(char** argv) {
+    // ensure empty param list
+    if (argv[1][6] != '#') {
         printf("%s", getErrrMsg(9));
         return 1;
     } else {
@@ -23,8 +25,9 @@ int executeCodeAski(char** message) {
 }
 
 // returns ASKA response
-int executeCodeAska(char** message) {
-    if ((*message)[6] != '#') {
+int executeCodeAska(char** argv) {
+    // ensure empty param list
+    if (argv[1][6] != '#') {
         printf("%s", getErrrMsg(10));
         return 1;
     } else {
@@ -39,57 +42,40 @@ int executeCodeAska(char** message) {
     return 0;
 }
 
-typedef enum { true,
-    false } bool;
-
 // returns SETG response
-int executeCodeSetg(char** message) {
-    if ((*message)[6] == '#') {
+int executeCodeSetg(char** argv) {
+    // ensure that param list cant be empty
+    if (argv[1][6] == '#') {
         printf("%s", getErrrMsg(11));
         return 1;
     } else {
-        char* hex_input = (char*)malloc(3);
-        if (hex_input == NULL) {
-            free(hex_input);
-            return 1;
-        }
-        hex_input[0] = (*message)[6];
-        hex_input[1] = (*message)[7];
-        hex_input[strlen(hex_input)] = '\0';
+        char hex_input[3] = { argv[1][6], argv[1][7], '\0' };
 
-        const char* resp_beg = "!SETG:";
-        const char* resp_end = "##\n";
-        char* full_resp = (char*)malloc(strlen(resp_beg) + (sizeof(char) * 2) + strlen(resp_end) + 1);
-        if (full_resp == NULL) {
-            free(hex_input);
-            free(full_resp);
-            return 1;
-        }
-
-        strcpy(full_resp, resp_beg);
+        // !SETG:00##\0
+        // 012345678910
+        char response[11] = "!SETG:";
 
         bool valid_input = false;
         char* allowed_list[21] = { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "0A", "0B", "0C", "0D", "0E", "0F", "10", "11", "12", "13", "14" };
-        const int allowed_list_size = sizeof(allowed_list) / sizeof(*allowed_list);
-        for (int i = 0; i < allowed_list_size; i++) {
+        const size_t allowed_list_size = sizeof(allowed_list) / sizeof(*allowed_list);
+        for (size_t i = 0; i < allowed_list_size; i++) {
             if (strcmp(hex_input, allowed_list[i]) == 0) {
                 valid_input = true;
             }
         }
         if (valid_input == true) {
-            full_resp[6] = hex_input[0];
-            full_resp[7] = hex_input[1];
+            response[6] = hex_input[0];
+            response[7] = hex_input[1];
+            response[8] = '#';
+            response[9] = '#';
         } else {
             printf("%s", getErrrMsg(12));
             return 1;
         }
-        free(hex_input);
 
-        strcat(full_resp, resp_end);
-        full_resp[strlen(full_resp)] = '\0';
+        response[sizeof(response) - 1] = '\0';
 
-        printf("%s", full_resp);
-        free(full_resp);
+        printf("%s\n", response);
     }
 
     return 0;
