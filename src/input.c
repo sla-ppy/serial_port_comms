@@ -7,6 +7,9 @@
 
 // guarantee messages are properly received from the user
 int isValidInput(int argc, char** argv, char* msg_cmd, const size_t msg_cmd_size, char** cmd_list, const size_t cmd_list_size) {
+    // test on file
+    argc = 2;
+
     // basic usage checks
     if (argc < 2) {
         printf("%s", getErrrMsg(2));
@@ -45,8 +48,12 @@ int isValidInput(int argc, char** argv, char* msg_cmd, const size_t msg_cmd_size
         return 1;
     }
 
+    // NOTE: fgets() and getline() both required me to use these indexes
+    // depending on how data is read into ReceiveBuffer, my solution might fail here
+
     // last two chars is #
-    if (argv[1][strlen(argv[1]) - 1] != '#' || argv[1][strlen(argv[1]) - 2] != '#') {
+    size_t arg_size = strlen(argv[1]);
+    if (argv[1][arg_size - 2] != '#' || argv[1][arg_size - 3] != '#') {
         printf("%s", getErrrMsg(7));
         return 1;
     }

@@ -68,12 +68,11 @@ int executeCodeSetg(char** argv) {
             response[7] = hex_input[1];
             response[8] = '#';
             response[9] = '#';
+            response[sizeof(response) - 1] = '\0';
         } else {
             printf("%s", getErrrMsg(12));
             return 1;
         }
-
-        response[sizeof(response) - 1] = '\0';
 
         printf("%s\n", response);
     }

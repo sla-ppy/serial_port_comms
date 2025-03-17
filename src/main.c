@@ -17,38 +17,42 @@ int main(int argc, char** argv) {
     // while (1) {
     //  getc(stdin);
 
-    /*
-    while(!eof) {
-    FILE *file;
-    file = fopen("input.txt", "r");
+    FILE* fp;
+    char* line = NULL;
+    int bufferLength = 255;
+    char buffer[bufferLength];
 
+    fp = fopen("input.txt", "r");
+    while (fgets(buffer, bufferLength, fp)) {
+        argv[1] = buffer;
+        printf("%s", buffer);
+
+        int rc = isValidInput(argc, argv, msg_cmd, msg_cmd_size, cmd_list, cmd_list_size);
+        if (rc == 1) {
+            break;
+        }
+
+        // process and send response
+        if (strcmp(msg_cmd, cmd_list[0]) == 0) {
+            rc = executeCodeAski(argv);
+            if (rc == 1) {
+                break;
+            }
+        } else if (strcmp(msg_cmd, cmd_list[1]) == 0) {
+            rc = executeCodeAska(argv);
+            if (rc == 1) {
+                break;
+            }
+        } else if (strcmp(msg_cmd, cmd_list[2]) == 0) {
+            rc = executeCodeSetg(argv);
+            if (rc == 1) {
+                break;
+            }
+        }
     }
 
-
-    */
-
-    int rc = isValidInput(argc, argv, msg_cmd, msg_cmd_size, cmd_list, cmd_list_size);
-    if (rc == 1) {
-        return 1;
-    }
-
-    // process and send response
-    if (strcmp(msg_cmd, cmd_list[0]) == 0) {
-        rc = executeCodeAski(argv);
-        if (rc == 1) {
-            return 1;
-        }
-    } else if (strcmp(msg_cmd, cmd_list[1]) == 0) {
-        rc = executeCodeAska(argv);
-        if (rc == 1) {
-            return 1;
-        }
-    } else if (strcmp(msg_cmd, cmd_list[2]) == 0) {
-        rc = executeCodeSetg(argv);
-        if (rc == 1) {
-            return 1;
-        }
-    }
+    free(line);
+    fclose(fp);
 
     return 0;
 }
