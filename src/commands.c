@@ -7,9 +7,9 @@
 #include "errors.h"
 
 // returns ASKI response
-int executeCodeAski(char** argv) {
+int executeCodeAski(char** ReceiveBuffer) {
     // ensure empty param list
-    if (argv[1][6] != '#') {
+    if (ReceiveBuffer[1][6] != '#') {
         printf("%s", getErrrMsg(9));
         return 1;
     } else {
@@ -25,9 +25,9 @@ int executeCodeAski(char** argv) {
 }
 
 // returns ASKA response
-int executeCodeAska(char** argv) {
+int executeCodeAska(char** ReceiveBuffer) {
     // ensure empty param list
-    if (argv[1][6] != '#') {
+    if (ReceiveBuffer[1][6] != '#') {
         printf("%s", getErrrMsg(10));
         return 1;
     } else {
@@ -43,13 +43,13 @@ int executeCodeAska(char** argv) {
 }
 
 // returns SETG response
-int executeCodeSetg(char** argv) {
+int executeCodeSetg(char** ReceiveBuffer) {
     // ensure that param list cant be empty
-    if (argv[1][6] == '#') {
+    if (ReceiveBuffer[1][6] == '#') {
         printf("%s", getErrrMsg(11));
         return 1;
     } else {
-        char hex_input[3] = { argv[1][6], argv[1][7], '\0' };
+        char hex_input[3] = { ReceiveBuffer[1][6], ReceiveBuffer[1][7], '\0' };
 
         // !SETG:00##\0
         // 012345678910
