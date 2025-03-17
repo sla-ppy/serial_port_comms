@@ -14,7 +14,7 @@ int main(int argc, char** ReceiveBuffer) {
     char* cmd_list[3] = { "ASKI", "ASKA", "SETG" };
     const size_t cmd_list_size = sizeof(cmd_list) / sizeof(*cmd_list);
 
-    size_t ReceiveBufferLen = 0;
+    size_t ReceiveBufferLen;
 
     while (1) {
         int rc = isValidInput(argc, ReceiveBuffer, msg_cmd, msg_cmd_size, cmd_list, cmd_list_size);

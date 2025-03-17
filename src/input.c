@@ -45,12 +45,13 @@ int isValidInput(int argc, char** ReceiveBuffer, char* msg_cmd, const size_t msg
         return 1;
     }
 
-    // NOTE: fgets() and getline() both required me to use these indexes
-    // depending on how data is read into ReceiveBuffer, my solution might fail here
+    // NOTE: fgets() and getline() both required me to use these indexes and they both end each line by including \n and \0
+    // depending on how data is read into ReceiveBuffer, my solution might fail here!
+    // if so, set [arg_size -1] to [arg_size -2] and [arg_size -2] to [arg_size -3]
 
     // last two chars is #
     size_t arg_size = strlen(ReceiveBuffer[1]);
-    if (ReceiveBuffer[1][arg_size - 2] != '#' || ReceiveBuffer[1][arg_size - 3] != '#') {
+    if (ReceiveBuffer[1][arg_size - 1] != '#' || ReceiveBuffer[1][arg_size - 2] != '#') {
         printf("%s", getErrrMsg(7));
         return 1;
     }
