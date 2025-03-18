@@ -17,5 +17,5 @@ valgrind and asan are both tools to check for memory leaks, out of bound accessi
 they are also super cool! :D
 
 -gdwarf-4  =>  is a compilation flag we need to run valgrind succesfully after compiling our program
--fsanitize=address,undefined  =>  also known as "asan", which is clang's compilation flag we can use instead of valgrind (prefered method)
+-fsanitize=address,undefined,leak  =>  also known as "asan", which is clang's compilation flag we can use instead of valgrind (prefered method)
 ```
